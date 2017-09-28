@@ -6,6 +6,8 @@ package org.seckill.exception;
  * @author 李奕锋
  */
 public class SeckillException extends RuntimeException {
+	
+	private static final long serialVersionUID = 1L;
 
 	public SeckillException(String message) {
 		super(message);

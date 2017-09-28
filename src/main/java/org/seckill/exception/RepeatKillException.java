@@ -6,6 +6,8 @@ package org.seckill.exception;
  * @author 李奕锋
  */
 public class RepeatKillException extends SeckillException {
+	private static final long serialVersionUID = 1L;
+
 	public RepeatKillException(String message) {
 		super(message);
 	}

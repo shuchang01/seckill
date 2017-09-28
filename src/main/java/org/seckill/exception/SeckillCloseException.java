@@ -6,6 +6,7 @@ package org.seckill.exception;
  * @author 李奕锋
  */
 public class SeckillCloseException extends SeckillException {
+	private static final long serialVersionUID = 1L;
 
 	public SeckillCloseException(String message) {
 		super(message);
