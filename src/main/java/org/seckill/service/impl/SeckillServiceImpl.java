@@ -42,7 +42,7 @@ public class SeckillServiceImpl implements SeckillService {
 	private RedisDao redisDao;
 
 	// md5盐值字符串，用于混淆MD5
-	private final String slat = "skdfjksjdf7787%^%^%^FSKJFK*(&&%^%&^8DF8^%^^*7hFJDHFJ";
+	private final String salt = "skdfjksjdf7787%^%^%^FSKJFK*(&&%^%&^8DF8^%^^*7hFJDHFJ";
 
 	@Override
 	public List<Seckill> getSeckillList() {
@@ -55,7 +55,7 @@ public class SeckillServiceImpl implements SeckillService {
 	}
 
 	private String getMD5(long seckillId) {
-		String base = seckillId + "/" + slat;
+		String base = seckillId + "/" + salt;
 		String md5 = DigestUtils.md5DigestAsHex(base.getBytes());
 		return md5;
 	}
@@ -75,9 +75,6 @@ public class SeckillServiceImpl implements SeckillService {
 				redisDao.putSeckill(seckill);
 			}
 		}
-		if (seckill == null) {
-			return new Exposer(false, seckillId);
-		}
 		Date startTime = seckill.getStartTime();
 		Date endTime = seckill.getEndTime();
 		// 系统当前时间
@@ -90,13 +87,14 @@ public class SeckillServiceImpl implements SeckillService {
 		return new Exposer(true, md5, seckillId);
 	}
 
-	@Override
-	@Transactional
+	
 	/**
 	 * 使用注解控制事务方法的优点： 1.开发团队达成一致约定，明确标注事务方法的编程风格
 	 * 2.保证事务方法的执行时间尽可能短，不要穿插其他网络操作，RPC/HTTP请求或者剥离到事务方法外部
 	 * 3.不是所有的方法都需要事务，如只有一条修改操作，只读操作不需要事务控制
 	 */
+	@Override
+	@Transactional
 	public SeckillExecution executeSeckill(long seckillId, long userPhone, String md5)
 			throws SeckillException, RepeatKillException, SeckillCloseException {
 		if (md5 == null || !md5.equals(getMD5(seckillId))) {
@@ -107,9 +105,9 @@ public class SeckillServiceImpl implements SeckillService {
 		try {
 			// 记录购买行为
 			int insertCount = successKilledDao.insertSuccessKilled(seckillId, userPhone);
-			// 唯一：seckillId,userPhone
+			// 唯一、联合主键：seckillId,userPhone
 			if (insertCount <= 0) {
-				// 重复秒杀
+				// 重复秒杀，该手机号对该商品已经秒杀过了
 				throw new RepeatKillException("seckill repeated");
 			} else {
 				// 减库存，热点商品竞争

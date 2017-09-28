@@ -6,12 +6,19 @@ package org.seckill.enums;
  * @author 李奕锋
  */
 public enum SeckillStateEnum {
-	SUCCESS(1, "秒杀成功"), END(0, "秒杀结束"), REPEAT_KILL(-1, "重发秒杀"), INNER_ERROR(-2, "系统异常"), DATA_REWRITE(-3, "数据篡改");
+	/** 秒杀成功 */
+	SUCCESS(1, "秒杀成功"), 
+	/** 秒杀结束" */
+	END(0, "秒杀结束"), 
+	/** 重复秒杀 */
+	REPEAT_KILL(-1, "重复秒杀"), 
+	/** 系统异常 */
+	INNER_ERROR(-2, "系统异常"),
+	/** 数据篡改 */
+	DATA_REWRITE(-3, "数据篡改");
 
 	private int state;
-
 	private String stateInfo;
-
 	private SeckillStateEnum(int state, String stateInfo) {
 		this.state = state;
 		this.stateInfo = stateInfo;

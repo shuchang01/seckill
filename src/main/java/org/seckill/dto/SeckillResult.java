@@ -3,10 +3,13 @@ package org.seckill.dto;
 //封装json结果
 public class SeckillResult<T> {
 
+	/** 是否成功标识 */
 	private boolean success;
 
+	/** 业务数据 */
 	private T data;
 
+	/** 消息 */
 	private String error;
 
 	public SeckillResult(boolean success, String error) {
