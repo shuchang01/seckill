@@ -31,6 +31,12 @@ public class SeckillController {
 	@Autowired
 	private SeckillService seckillService;
 
+	/**
+	 * 查看待秒杀商品列表
+	 * 
+	 * @param model
+	 * @return
+	 */
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	public String list(Model model) {
 		// 获取列表页
@@ -40,6 +46,13 @@ public class SeckillController {
 		return "list";// WEB-INF/jsp/"list".jsp
 	}
 
+	/**
+	 * 查看某个秒杀商品的详情
+	 * 
+	 * @param seckillId
+	 * @param model
+	 * @return
+	 */
 	@RequestMapping(value = "/{seckillId}/detail", method = RequestMethod.GET)
 	public String detail(@PathVariable("seckillId") Long seckillId, Model model) {
 		if (seckillId == null) {
@@ -53,7 +66,12 @@ public class SeckillController {
 		return "detail";
 	}
 
-	// ajax json
+	/**
+	 * 开始执行 秒杀操作, 秒杀开启时输出秒杀接口地址，否则输出系统时间和秒杀时间
+	 * 
+	 * @param seckillId
+	 * @return 返回 ajax json 数据
+	 */
 	@RequestMapping(value = "/{seckillId}/exposer", method = RequestMethod.POST, produces = {
 			"application/json; charset=utf-8" })
 	@ResponseBody
@@ -69,6 +87,14 @@ public class SeckillController {
 		return result;
 	}
 
+	/**
+	 * 执行秒杀操作
+	 * 
+	 * @param seckillId
+	 * @param md5
+	 * @param phone
+	 * @return
+	 */
 	@RequestMapping(value = "/{seckillId}/{md5}/execution", method = RequestMethod.POST, produces = {
 			"application/json; charset=utf-8" })
 	@ResponseBody
