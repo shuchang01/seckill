@@ -50,7 +50,7 @@ public class RedisDao {
 	}
 
 	public String putSeckill(Seckill seckill) {
-		// set Object(Seckill) -> 序列号 -> byte[]
+		// set Object(Seckill) -> 序列化 -> byte[]
 		try {
 			Jedis jedis = jedisPool.getResource();
 			try {
