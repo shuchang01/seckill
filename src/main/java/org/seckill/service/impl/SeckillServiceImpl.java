@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 
-//@Componet @Service @Dao @Controller
+//@Configuration @Component @Service @Repository @Controller @RestController
 @Service
 public class SeckillServiceImpl implements SeckillService {
 
@@ -42,7 +42,7 @@ public class SeckillServiceImpl implements SeckillService {
 	private RedisDao redisDao;
 
 	// md5盐值字符串，用于混淆MD5
-	private final String salt = "skdfjksjdf7787%^%^%^FSKJFK*(&&%^%&^8DF8^%^^*7hFJDHFJ";
+	private static final String SALT = "skdfjksjdf7787%^%^%^FSKJFK*(&&%^%&^8DF8^%^^*7hFJDHFJ";
 
 	@Override
 	public List<Seckill> getSeckillList() {
@@ -55,7 +55,7 @@ public class SeckillServiceImpl implements SeckillService {
 	}
 
 	private String getMD5(long seckillId) {
-		String base = seckillId + "/" + salt;
+		String base = seckillId + "/" + SALT;
 		String md5 = DigestUtils.md5DigestAsHex(base.getBytes());
 		return md5;
 	}
@@ -79,6 +79,7 @@ public class SeckillServiceImpl implements SeckillService {
 		Date endTime = seckill.getEndTime();
 		// 系统当前时间
 		Date nowTime = new Date();
+		// startTime <= nowTime <= endTime 之间才能够暴露秒杀接口出去
 		if (nowTime.getTime() < startTime.getTime() || nowTime.getTime() > endTime.getTime()) {
 			return new Exposer(false, seckillId, nowTime.getTime(), startTime.getTime(), endTime.getTime());
 		}
@@ -103,20 +104,20 @@ public class SeckillServiceImpl implements SeckillService {
 		// 执行秒杀逻辑：减库存 + 记录购买行为
 		Date now = new Date();
 		try {
-			// 记录购买行为
+			// 1，记录购买行为
 			int insertCount = successKilledDao.insertSuccessKilled(seckillId, userPhone);
 			// 唯一、联合主键：seckillId,userPhone
 			if (insertCount <= 0) {
 				// 重复秒杀，该手机号对该商品已经秒杀过了
 				throw new RepeatKillException("seckill repeated");
 			} else {
-				// 减库存，热点商品竞争
+				// 2，减库存，热点商品竞争
 				int updateCount = seckillDao.reduceNumber(seckillId, now);
 				if (updateCount <= 0) {
 					// 没有更新到记录 rollback
 					throw new SeckillCloseException("seckill is closed");
 				} else {
-					// 秒杀成功 commit
+					// 3，秒杀成功 commit
 					SuccessKilled successKilled = successKilledDao.queryByIdWithSeckill(seckillId, userPhone);
 					return new SeckillExecution(seckillId, SeckillStateEnum.SUCCESS, successKilled);
 				}
